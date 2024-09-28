@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+const db = require('../configuracionDB/conectarDB')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -11,5 +12,15 @@ router.get('/nuevo', function(req, res, next) {
     "titulo" : "ruta indice"   
   });
 });
+////////////////////////////////////////////
 
+router.get('/marca', function(req, res, next) {
+  db.any('SELECT NOW()')
+      .then(data => {
+        return res.send(data);
+      })
+      .catch(error => {
+        return res.send(error);
+      })
+});
 module.exports = router;
