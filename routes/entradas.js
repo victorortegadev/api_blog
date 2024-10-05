@@ -15,8 +15,11 @@ router.get('/entradas', function(req, res, next) {
 router.get('/entrada/:id', function(req, res, next) {
   const id = req.params['id']
   pedirEntrada('entradas',id, (error, data) =>{
-    if(error || !data){
+    if(error){
       return next(error)
+    }
+    if(!data){
+      return res.send({'inexistente':'si'})
     }
     return res.send(data)
   })

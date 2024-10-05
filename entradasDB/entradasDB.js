@@ -40,11 +40,10 @@ function crearEntrada (tabla, entrada, callback) {
 }
 
 function actualizarEntrada (tabla, entrada,callback) {
+
     const llaves = Object.keys(entrada)
     const claves_valores = llaves.map((llave) => {return `${llave}=${entrada[llave] != null 
         ? `'${entrada[llave]}'`: null}`}).join()
-
-    console.log(` update ${tabla} set ${claves_valores} where id = ${entrada.id} RETURNING * ;`)
     
     db.any(` update ${tabla} set ${claves_valores} where id = ${entrada.id} RETURNING * ;`)
         .then(([data]) => {
@@ -67,12 +66,16 @@ function borrarEntrada (tabla,id,callback) {
 }
 
 function buscarEntradas (tabla, claveBusqueda, callback) {
-
-    let claveBusquedaLimpiado = claveBusqueda.replaceAll(",", " ").replaceAll(".", " ").replaceAll('|', ' ').replaceAll('\n', ' ').replaceAll('\t', ' ').replaceAll('\\', ' ').replaceAll('\r', ' ').replaceAll('\v', '').replaceAll('\'', ' ').replaceAll('\"', ' ')
-    let claveArr = claveBusquedaLimpiado.split(" ").filter(chr => chr !== "");
-
-    let comando =  claveArr.map(clave => {return claveArr.length > 1? `${clave == claveArr[0]? '' : 'AND'} textoplano like '% ${clave} %'` :  `textoplano LIKE '% ${clave} %'`}).join().replaceAll(",", " ")
     
+    let claveBusquedaLimpiado = claveBusqueda.replaceAll('*', ' ').replaceAll(",", " ").replaceAll(".", " ").replaceAll('|', ' ').replaceAll('\n', ' ').replaceAll('\t', ' ').replaceAll('\\', ' ').replaceAll('\r', ' ').replaceAll('\v', '').replaceAll('\'', ' ').replaceAll('\"', ' ')
+    let claveArr = claveBusquedaLimpiado.split(" ").filter(chr => chr !== "");
+  
+    let comandoTexto = claveArr.map(clave => {return claveArr.length > 1? `${clave == claveArr[0]? '' : 'AND'} textoplano like '% ${clave} %'` :  `textoplano LIKE '% ${clave} %'`}).join().replaceAll(",", " ")
+
+    let comandoTitulo = claveArr.map(clave => {return claveArr.length > 1? `${clave == claveArr[0]? '' : 'AND'} titulobuscar like '% ${clave} %'` :  `titulobuscar LIKE '% ${clave} %'`}).join().replaceAll(",", " ")
+    
+    let comando = `${comandoTexto} OR ${comandoTitulo}`
+
    db.multi(`SELECT * FROM ${tabla} WHERE ${comando};`)
         .then(([data]) => {
             callback(null, data)
